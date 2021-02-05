@@ -1,0 +1,15 @@
+//Estrutura para Alarme baseada no cruzamento MM9
+
+begin
+  Se (IsBought) então
+    Inicio
+      Se(Close<= Minima[1]) então
+        Alert(clYellow);
+      Fim
+  Senão
+    Inicio
+      Se (MediaExp(9,Close) > MediaExp(9,Close)[1]) 
+        e (MediaExp(9,Close)[1]< MediaExp(9,Close)[2]) então //pivot
+        Alert(clGreen);
+  Fim;
+end;
