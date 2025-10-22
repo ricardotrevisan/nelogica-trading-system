@@ -1,0 +1,60 @@
+var
+  mme, mme1, mme2 : float;
+  adxVal          : float;
+  min1, max1      : float;
+
+begin
+  // -------- Pré-cálculos (fora de condicionais) --------
+  mme    := MediaExp(9, Close);       // período fixo: 9
+  mme1   := MediaExp(9, Close)[1];
+  mme2   := MediaExp(9, Close)[2];
+  adxVal := ADX(14,7);               // ADX um pouco mais rápido 14,7
+  min1   := Minima[1];
+  max1   := Maxima[1];
+
+  // -------- Regras --------
+  if IsBought then
+  begin
+    // Stop de compra: perdeu a mínima anterior
+    if Close <= min1 then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: abaixo da mínima anterior", clYellow, 3, 6, High);
+      //SellToCoverStop(Close, Close);
+      //SellToCoverAtMarket;
+    end;
+  end
+  else if IsSold then
+  begin
+    // Stop de short: rompeu a máxima anterior
+    if Close >= max1 then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: acima da máxima anterior", clYellow, 3, 6, Low);
+      //BuyToCoverStop(Close, Close);
+      //BuyToCoverAtMarket;
+    end;
+  end
+  else
+  begin
+    // Entradas só com força (ADX >= 25)
+    if adxVal >= 25 then
+    begin
+      // Reversão de ALTA na MME -> possível COMPRA
+      if (mme > mme1) and (mme1 < mme2) then
+      begin
+        //Alert(clGreen);
+        PlotText("✅ Reversão MME com ADX forte — possível compra", clGreen, 3, 6, Low);
+      end;
+
+      // Reversão de BAIXA na MME -> possível SHORT
+      if (mme < mme1) and (mme1 > mme2) then
+      begin
+        //Alert(clRed);
+        PlotText("🚨 Reversão MME com ADX forte — possível venda (short)", clRed, 3, 6, High);
+      end;
+    end;
+  end;
+end;
+
+

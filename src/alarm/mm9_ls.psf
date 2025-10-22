@@ -1,0 +1,55 @@
+var
+  preco : float;
+  stop  : float;
+
+begin
+  // ======================
+  // 📈 Quando comprado
+  // ======================
+  if IsBought then
+  begin
+    if Close <= Minima[1] then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: abaixo da mínima anterior", clYellow, 3, 6, High);
+      //SellToCoverStop(Close, Close);
+      //SellToCoverAtMarket;
+    end;
+  end
+
+  // ======================
+  // 📉 Quando vendido
+  // ======================
+  else if IsSold then
+  begin
+    if Close >= Maxima[1] then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: acima da máxima anterior", clYellow, 3, 6, Low);
+      //BuyToCoverStop(Close, Close);
+      //BuyToCoverAtMarket;
+    end;
+  end
+
+  // ======================
+  // ⚙️ Sem posição
+  // ======================
+  else
+  begin
+    // Reversão de alta (compra)
+    if (MediaExp(9, Close) > MediaExp(9, Close)[1]) and
+       (MediaExp(9, Close)[1] < MediaExp(9, Close)[2]) then
+    begin
+      //Alert(clGreen);
+      PlotText("✅ Reversão MME9 — possível compra", clGreen, 3, 6, Low);
+    end;
+
+    // Reversão de baixa (short)
+    if (MediaExp(9, Close) < MediaExp(9, Close)[1]) and
+       (MediaExp(9, Close)[1] > MediaExp(9, Close)[2]) then
+    begin
+      //Alert(clRed);
+      PlotText("🚨 Reversão MME9 — possível venda (short)", clRed, 3, 6, High);
+    end;
+  end;
+end;

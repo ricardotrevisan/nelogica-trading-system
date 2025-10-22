@@ -1,0 +1,59 @@
+var
+  mme, mme1, mme2 : float;
+  adxVal, ifrVal   : float;
+  min1, max1       : float;
+
+begin
+  // -------- Pré-cálculos (fora de condicionais) --------
+  mme    := MediaExp(9, Close);       // período fixo: 9
+  mme1   := MediaExp(9, Close)[1];
+  mme2   := MediaExp(9, Close)[2];
+  adxVal := ADX(14, 7);                  // ADX com suavização 7 (mais responsivo)
+  ifrVal := RSI(14,0);                  // IFR (RSI) de 14 períodos
+  min1   := Minima[1];
+  max1   := Maxima[1];
+
+  // -------- Regras --------
+  if IsBought then
+  begin
+    // Stop de compra: perdeu a mínima anterior
+    if Close <= min1 then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: abaixo da mínima anterior", clYellow, 3, 6, High);
+      //SellToCoverStop(Close, Close);
+      //SellToCoverAtMarket;
+    end;
+  end
+  else if IsSold then
+  begin
+    // Stop de short: rompeu a máxima anterior
+    if Close >= max1 then
+    begin
+      Alert(clYellow);
+      PlotText("⚠ Stop: acima da máxima anterior", clYellow, 3, 6, Low);
+      //BuyToCoverStop(Close, Close);
+      //BuyToCoverAtMarket;
+    end;
+  end
+  else
+  begin
+    // Entradas só com força (ADX >= 25)
+    if adxVal >= 25 then
+    begin
+      // Reversão de ALTA na MME + IFR baixo (<40) -> possível COMPRA
+      if (mme > mme1) and (mme1 < mme2) then //and (ifrVal < 40) then
+      begin
+        Alert(clGreen);
+        PlotText("✅ MME9↑ + ADX forte + IFR baixo — possível compra", clGreen, 3, 6, Low);
+      end;
+
+      // Reversão de BAIXA na MME + IFR alto (>60) -> possível SHORT
+      if (mme < mme1) and (mme1 > mme2) then // and (ifrVal > 60) then
+      begin
+        Alert(clRed);
+        PlotText("🚨 MME9↓ + ADX forte + IFR alto — possível venda (short)", clRed, 3, 6, High);
+      end;
+    end;
+  end;
+end;

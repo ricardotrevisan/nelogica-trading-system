@@ -1,0 +1,57 @@
+var
+  mme, mme1, mme2 : float;
+  adxVal, ifrVal, atvVal : float;
+  min1, max1 : float;
+  tr, trMedia : float;
+  periodoATR : integer;
+
+begin
+  // -------- Pré-cálculos --------
+  periodoATR := 14;
+  mme        := MediaExp(9, Close);
+  mme1       := MediaExp(9, Close)[1];
+  mme2       := MediaExp(9, Close)[2];
+  adxVal     := ADX(14, 7);
+  ifrVal     := RSI(14, 0);
+  min1       := Low[1];
+  max1       := High[1];
+
+  // -------- True Range e ATV --------
+  tr := Max(
+          High - Low,
+          Max(abs(High - Close[1]), abs(Low - Close[1]))
+        );
+  atvVal  := Media(periodoATR, tr);
+  trMedia := Media(periodoATR * 2, tr);
+
+  // -------- Regras de coloração --------
+  // Verde → sinal de compra
+  // Vermelho → sinal de venda
+  // Amarelo → alerta de stop
+
+  if (adxVal >= 25) and (atvVal > trMedia) then
+  begin
+    // Reversão de ALTA (MME9 sobe)
+    if (mme > mme1) and (mme1 < mme2) then
+    begin
+      PaintBar(clGreen);  // pinta candle verde
+      Alert(clGreen);
+      PlotText("✅ MME9↑ + ADX forte + ATV↑ — possível compra", clGreen, 3, 6, Low);
+    end;
+
+    // Reversão de BAIXA (MME9 desce)
+    if (mme < mme1) and (mme1 > mme2) then
+    begin
+      PaintBar(clRed);    // pinta candle vermelho
+      Alert(clRed);
+      PlotText("🚨 MME9↓ + ADX forte + ATV↑ — possível short", clRed, 3, 6, High);
+    end;
+  end;
+
+  // Stops — só mudam cor se já há posição (simulação visual)
+  if IsBought and (Close <= min1) then
+    PaintBar(clYellow)
+  else if IsSold and (Close >= max1) then
+    PaintBar(clYellow);
+
+end;

@@ -1,0 +1,29 @@
+var
+  mme, mmeNorm, mme1, mme2 : float;
+  adxVal, atvVal : float;
+  tr : float;
+  periodoATR : integer;
+
+begin
+  // -------- Configurações --------
+  periodoATR := 14;
+
+  // -------- Cálculos base --------
+  mme      := MediaExp(9, Close);
+  mmeNorm := (mme / Close - 1) * 100;
+  mme1     := MediaExp(9, Close)[1];
+  mme2     := MediaExp(9, Close)[2];
+  adxVal   := ADX(14, 7);
+
+  // True Range manual
+  tr := Max(
+          High - Low,
+          Max(abs(High - Close[1]), abs(Low - Close[1]))
+        );
+  atvVal := Media(periodoATR, tr);  // Volatilidade média (ATV)
+
+  // -------- PLOTS --------
+  Plot(adxVal);     // Linha 1 → ADX
+  Plot2(atvVal);    // Linha 2 → ATV
+  Plot3(mmeNorm);   // Linha 3 → MME9
+end;
